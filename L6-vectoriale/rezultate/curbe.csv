@@ -1,0 +1,15 @@
+sistem,setare,recall@10,p50_ms,p95_ms
+pgvector,exact,0.9995,35.628,45.801
+Qdrant,exact,0.9995,47.918,51.851
+pgvector,ef_search=10,0.978,0.487,0.725
+Qdrant,hnsw_ef=10,0.982,44.036,48.348
+pgvector,ef_search=20,0.994,0.613,0.855
+Qdrant,hnsw_ef=20,0.996,44.037,48.247
+pgvector,ef_search=40,0.9945,0.698,1.144
+Qdrant,hnsw_ef=40,0.9985,44.025,48.135
+pgvector,ef_search=80,0.9995,0.842,1.373
+Qdrant,hnsw_ef=80,0.999,44.03,48.04
+pgvector,ef_search=160,0.9995,1.308,2.064
+Qdrant,hnsw_ef=160,0.9995,44.026,48.209
+pgvector,ef_search=320,0.9995,1.909,2.945
+Qdrant,hnsw_ef=320,0.9995,44.147,48.485

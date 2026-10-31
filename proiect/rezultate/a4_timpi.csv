@@ -1,0 +1,4 @@
+metoda,masuratori,p50_ms,p95_ms,domeniu
+initial,2000,0.000589,0.000668,"selectie in memorie; fara CLIP, SQL, RRF sau HTML"
+stoc,2000,0.004326,0.005836,"selectie in memorie; fara CLIP, SQL, RRF sau HTML"
+stoc_diversitate,2000,0.025577,0.048015,"selectie in memorie; fara CLIP, SQL, RRF sau HTML"

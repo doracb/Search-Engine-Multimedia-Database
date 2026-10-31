@@ -1,0 +1,105 @@
+# Numele stivei. Pe laptop se lasa asa; pe server, fiecare student primeste
+# al lui prin COMPOSE_PROJECT_NAME (vezi scripturi/porneste-stiva.sh).
+name: ${COMPOSE_PROJECT_NAME:-bdm}
+
+# Adu serviciile pe rand, cu profile:
+#   docker compose --profile db up -d
+#   docker compose --profile db --profile vect up -d
+#   docker compose --profile db --profile vect --profile lab up -d
+#   docker compose --profile garage up -d        (varianta A de object storage)
+#   docker compose --profile seaweed up -d       (varianta B de object storage)
+
+services:
+
+  # --- Etapa 1 -------------------------------------------------------------
+  postgres:
+    image: pgvector/pgvector:0.8.6-pg18
+    profiles: ["db"]
+    environment:
+      POSTGRES_USER: ${PGUSER:-bdm}
+      POSTGRES_PASSWORD: ${PGPASSWORD:-bdm}
+      POSTGRES_DB: ${PGDATABASE:-bdm}
+    ports:
+      - "${BIND_ADDR:-127.0.0.1}:${PG_PORT:-5432}:5432"
+    volumes:
+      # ATENTIE: in 18+ volumul se monteaza la /var/lib/postgresql, NU la
+      # .../data. PGDATA e /var/lib/postgresql/18/docker, adica un subdirector.
+      # Calea veche porneste containerul, dar pierde datele intr-un volum anonim.
+      - pgdata:/var/lib/postgresql
+      # Tot proiectul, in citire. Fisele refera caile complete:
+      #   /proiect/L1-ingest/sql/01_schema.sql
+      - ./:/proiect:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${PGUSER:-bdm} -d ${PGDATABASE:-bdm}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    shm_size: 256mb
+
+  # --- Etapa 2 -------------------------------------------------------------
+  qdrant:
+    image: qdrant/qdrant:v1.12.4
+    profiles: ["vect"]
+    ports:
+      - "${BIND_ADDR:-127.0.0.1}:${QDRANT_PORT:-6333}:6333"        # REST + /dashboard
+      - "${BIND_ADDR:-127.0.0.1}:${QDRANT_GRPC_PORT:-6334}:6334"   # gRPC
+    volumes:
+      - qdrantdata:/qdrant/storage
+
+  # --- Etapa 3 -------------------------------------------------------------
+  jupyter:
+    build: ./jupyter
+    image: bdm-jupyter:2.0
+    profiles: ["lab"]
+    ports:
+      - "${BIND_ADDR:-127.0.0.1}:${JUPYTER_PORT:-8890}:8888"
+    environment:
+      JUPYTER_TOKEN: bdm
+      PGHOST: postgres
+      PGUSER: ${PGUSER:-bdm}
+      PGPASSWORD: ${PGPASSWORD:-bdm}
+      PGDATABASE: ${PGDATABASE:-bdm}
+      QDRANT_URL: http://qdrant:6333
+      S3_ENDPOINT: ${S3_ENDPOINT:-http://garage:3900}
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY:-}
+      S3_SECRET_KEY: ${S3_SECRET_KEY:-}
+      S3_REGION: ${S3_REGION:-garage}
+    volumes:
+      - ./:/home/jovyan/proiect
+      - ./date:/date:ro
+
+  # --- Etapa 4, varianta A -------------------------------------------------
+  garage:
+    image: dxflrs/garage:v1.0.1
+    profiles: ["garage"]
+    ports:
+      - "${BIND_ADDR:-127.0.0.1}:${S3_PORT:-3900}:3900"             # API S3
+      - "${BIND_ADDR:-127.0.0.1}:${GARAGE_ADMIN_PORT:-3903}:3903"   # administrare
+    volumes:
+      - ./garage/garage.toml:/etc/garage.toml:ro
+      - garagemeta:/var/lib/garage/meta
+      - garagedata:/var/lib/garage/data
+
+  # --- Etapa 4, varianta B -------------------------------------------------
+  seaweedfs:
+    image: chrislusf/seaweedfs:3.80
+    profiles: ["seaweed"]
+    command: >
+      server -dir=/data -s3 -s3.port=8333
+      -s3.config=/etc/seaweedfs/s3.json
+      -master.volumeSizeLimitMB=1024
+      -volume.max=0
+    ports:
+      - "${BIND_ADDR:-127.0.0.1}:${S3_PORT:-8333}:8333"                  # API S3
+      - "${BIND_ADDR:-127.0.0.1}:${SEAWEED_FILER_PORT:-8888}:8888"     # filer
+      - "${BIND_ADDR:-127.0.0.1}:${SEAWEED_MASTER_PORT:-9333}:9333"    # master
+    volumes:
+      - seaweeddata:/data
+      - ./seaweedfs/s3.json:/etc/seaweedfs/s3.json:ro
+
+volumes:
+  pgdata:
+  qdrantdata:
+  garagemeta:
+  garagedata:
+  seaweeddata:

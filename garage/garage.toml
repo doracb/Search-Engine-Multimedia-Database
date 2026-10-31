@@ -1,0 +1,21 @@
+metadata_dir = "/var/lib/garage/meta"
+data_dir     = "/var/lib/garage/data"
+db_engine    = "sqlite"
+
+# Un singur nod, fara replicare. Corect pentru laborator, gresit in productie.
+replication_factor = 1
+
+rpc_bind_addr   = "[::]:3901"
+rpc_public_addr = "127.0.0.1:3901"
+# Completat automat de comun/pregateste-garage.sh. Nu editati de mana.
+rpc_secret = "2b66b168c3317177ec2535199ee181c4730056f1b4ea77413bf06ad6524a717f"
+
+[s3_api]
+s3_region     = "garage"
+api_bind_addr = "[::]:3900"
+root_domain   = ".s3.garage.localhost"
+
+[admin]
+api_bind_addr = "[::]:3903"
+# Completat automat de comun/pregateste-garage.sh. Nu editati de mana.
+admin_token = "AVtybMlyI+wJUdaxjdJVjfWU/eSB9LczV2v/5gU23E8="

@@ -1,0 +1,14 @@
+{
+  "identities": [
+    {
+      "name": "bdm",
+      "credentials": [
+        {
+          "accessKey": "bdmaccesskey",
+          "secretKey": "bdmsecretkey"
+        }
+      ],
+      "actions": ["Admin", "Read", "Write", "List", "Tagging"]
+    }
+  ]
+}

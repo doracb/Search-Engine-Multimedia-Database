@@ -1,0 +1,11 @@
+sistem,k_rrf,P@10_mediu,suprapunere_top10_cu_k60,clasamente_identice_cu_k60
+vectori,,0.75,,
+text,,0.66,,
+hibrid,0,0.78,0.71,3
+hibrid,5,0.8,0.77,4
+hibrid,10,0.81,0.83,4
+hibrid,20,0.81,0.91,4
+hibrid,40,0.81,0.99,7
+hibrid,60,0.81,1.0,10
+hibrid,100,0.81,1.0,7
+hibrid,200,0.81,1.0,6

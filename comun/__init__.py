@@ -1,0 +1,1 @@
+"""Cod comun laboratoarelor BDM."""
